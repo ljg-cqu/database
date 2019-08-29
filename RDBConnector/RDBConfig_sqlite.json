@@ -1,0 +1,10 @@
+{
+    "driver_name": "sqlite3",
+    "dsn_string": "C:/Workspace/Go/src/github.com/ljg_cqu/database/RDBConnector/testDB.db",
+    "conn_max_lifetime": 1000000000,
+    "max_idle_conns": 100, 
+    "max_open_conns": 1000,
+    "optionals": {
+        "optional_key_sqlite": "optional_value_sqlite"
+    }
+}

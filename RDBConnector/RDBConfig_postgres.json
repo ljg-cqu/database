@@ -1,0 +1,21 @@
+{
+    "driver_name": "postgres",
+    "dsn": {
+        "host": "localhost",
+        "port": "5432",
+        "user": "postgres",
+        "password": "QrfV2_Pg",
+        "sslmode": "disable",
+        "dbname": "testDB",
+        "optionals": {
+            "": ""
+        }
+    },
+    "dsn_string": "",
+    "conn_max_lifetime": 1000000000,
+    "max_idle_conns": 100, 
+    "max_open_conns": 1000,
+    "optionals": {
+        "optional_key": "optional_value"
+    }
+}

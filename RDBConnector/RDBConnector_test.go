@@ -33,12 +33,12 @@ func Test_CreateRDBConnector(t *testing.T) {
 			// testDB database should be created beforehand
 			newDSN := "host=localhost port=5432 user=postgres password=QrfV2_Pg sslmode=disable dbname=testDB"
 			switchDB := func(config *RDBConfig) error {
-				config.DSN = newDSN
+				config.DSNString = newDSN
 				return nil
 			}
 
 			c := CreateRDBConnector(switchDB)
-			if c.config.DSN != newDSN || c.GormDB == nil {
+			if c.config.DSNString != newDSN || c.GormDB == nil {
 				t.Error("Failed creating RDBConnector")
 				return
 			} 
@@ -78,12 +78,12 @@ func Test_CreateRDBConnector(t *testing.T) {
 			// testDB2 database does not be created beforehand
 			newDSN := "host=localhost port=5432 user=postgres password=QrfV2_Pg sslmode=disable dbname=testDB2"
 			switchDB := func(config *RDBConfig) error {
-				config.DSN = newDSN
+				config.DSNString = newDSN
 				return nil
 			}
 
 			c := CreateRDBConnector(switchDB)
-			if c.config.DSN != newDSN || c.GormDB == nil {
+			if c.config.DSNString != newDSN || c.GormDB == nil {
 				t.Error("Failed creating RDBConnector")
 				return
 			} 

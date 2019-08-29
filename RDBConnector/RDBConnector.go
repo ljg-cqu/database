@@ -1,6 +1,8 @@
 
 // RDBConnector package implements relational database connector.
 // Based on gorm library, with PostgreSQL supported as default.
+// Users can choose to use another RDB with appropriate configurations.
+// Besides update import package for database driver accordingly.
 package RDBConnector
 
 import (
@@ -8,7 +10,7 @@ import (
 
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
-	// _ "github.com/jinzhu/gorm/dialects/sqlite"
+	_ "github.com/jinzhu/gorm/dialects/sqlite"
 	// _ "github.com/jinzhu/gorm/dialects/mysql"
 	// _ "github.com/jinzhu/gorm/dialects/mssql"
 )
@@ -16,16 +18,18 @@ import (
 // Default relational database configuration
 var defaultRDBConfig RDBConfig
 
-// Options for user-specified relational database configuration
-type RDBConfigOption func(config *RDBConfig) error
+// Optionals for user-specified relational database configuration
+type RDBConfigFunc func(config *RDBConfig) error
 
 // Data type for relational database configuration
 type RDBConfig struct {
-    DriverName string 
-    DSN string 
-    ConnMaxLifetime time.Duration
-    MaxIdleConns int
-    MaxOpenConns int
+    DriverName string `json:"driver_name"` 
+	DSN *RDBDSNGenerator `json:"dsn"`
+	DSNString string `json:"dsn_string"`
+    ConnMaxLifetime time.Duration `json:"conn_max_lifetime"`
+    MaxIdleConns int `json:"max_idle_conns"`
+	MaxOpenConns int `json:"max_open_conns"`
+	Optionals map[string]interface{} `json:"optionals, omitempty"` // Intendedly left for user-specified choices.
 }
 
 // Relational database connector that wraps *gorm.DB
@@ -35,12 +39,12 @@ type RDBConnector struct {
 }
 
 // Create relational database connector with configuration
-func CreateRDBConnector(options ...RDBConfigOption) *RDBConnector {
+func CreateRDBConnector(Optionals ...RDBConfigFunc) *RDBConnector {
 	// Get relational database configuration
-    config := createRDBConfig(options...)
+    config := createRDBConfig(Optionals...)
 
     // Connect to relational database based on gorm library
-    db, err := gorm.Open(config.DriverName, config.DSN)
+    db, err := gorm.Open(config.DriverName, config.DSNString)
     if err != nil {
     	panic(err)
 	}
@@ -54,16 +58,16 @@ func CreateRDBConnector(options ...RDBConfigOption) *RDBConnector {
     return &RDBConnector{config, db}
 }
 
-// Create relational database configuration according to user's options,
-// or return the default values in case of no options input
-func createRDBConfig(options ...RDBConfigOption) *RDBConfig {
-	if len(options) == 0 {
+// Create relational database configuration according to user's Optionals,
+// or return the default values in case of no Optionals input
+func createRDBConfig(Optionals ...RDBConfigFunc) *RDBConfig {
+	if len(Optionals) == 0 {
 		return &defaultRDBConfig
 	}
 
 	// Copy default coniguration parameters
 	userRDBConfig := defaultRDBConfig
-    for _, option := range options {
+    for _, option := range Optionals {
     	if err := option(&userRDBConfig); err != nil {
     		panic(err)
 		}
@@ -75,8 +79,15 @@ func init() {
 	// Set default relational database configuration
 	defaultRDBConfig = RDBConfig {
 		DriverName: "postgres",
-		// dbname default as postgres
-		DSN: "host=localhost port=5432 user=postgres password=QrfV2_Pg sslmode=disable",
+		// DSN: &RDBDSNGenerator{
+		// 	Host: "localhost",
+		// 	Port: "5432",
+		// 	User: "postgres",
+		// 	Password: "QrfV2_Pg", 
+		// 	SSLMode: "disable",
+		// 	DBName: "testDB",
+		// },
+		DSNString: "host=localhost port=5432 user=postgres password=QrfV2_Pg sslmode=disable dbname=testDB",
 		ConnMaxLifetime: time.Second * 10,
 		MaxIdleConns: 100,
 		MaxOpenConns: 1000,
